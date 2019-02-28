@@ -6,12 +6,35 @@ import Navbar from 'react-bootstrap/lib/Navbar';
 import Row from 'react-bootstrap/lib/Row';
 import Grid from 'react-bootstrap/lib/Grid';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import Cookies from 'js-cookie';
+import Api from './Logic/Api';
 
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
       login: false
+    }
+    this.onLogin = this.onLogin.bind(this);
+  }
+
+  onLogin(data) {
+    Cookies.set('token', data.token, { expires: 7 });
+    this.setState({
+      login: true
+    });
+  }
+
+  componentDidMount() {
+    var token = Cookies.get('token');
+    if (token) {
+      Api.auth(token).then(response => {
+        if (response.ok) {
+          this.setState({
+            login: true
+          });
+        }
+      });
     }
   }
 
@@ -20,7 +43,7 @@ class App extends Component {
     if (this.state.login) {
       content = <MainPanel title = "index"/>;
     } else {
-      content = <LoginForm />;
+      content = <LoginForm onLogin = { this.onLogin }/>;
     }
     return (
       <Grid>
